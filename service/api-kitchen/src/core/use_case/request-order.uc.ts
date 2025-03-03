@@ -2,13 +2,16 @@ import { CustomError } from '../../common/types/custom-error';
 import { IresponseBase, ResponseBase } from '../../common/types/response-base.model';
 import { OrderRepository } from '../../drivers/repositories/order.repository.impl';
 import { RecipeRepository } from '../../drivers/repositories/recipe.repository.impl';
-import { CacheDriver } from '../../drivers/repositories/cache-manager.dirver.impl';
+import { CacheDriver } from '../../drivers/repositories/cache-manager.driver.impl';
 import { Recipes } from '../../drivers/entities/recipes.entity';
+import { WarehouseDriver } from '../../drivers/repositories/warehouse.driver.impl';
+import { EstatusOrder } from '../../common/enum/status-order.enum';
 
 export class RequestOrderUC {
   private static instance: RequestOrderUC;
 
   private orderDriver: OrderRepository;
+  private warehouseDriver: WarehouseDriver;
   private recipeDriver: RecipeRepository;
   private cacheDriver: CacheDriver;
 
@@ -16,6 +19,7 @@ export class RequestOrderUC {
     this.orderDriver = OrderRepository.getInstance();
     this.recipeDriver = RecipeRepository.getInstance();
     this.cacheDriver = CacheDriver.getInstance();
+    this.warehouseDriver = WarehouseDriver.getInstance();
   }
 
   public static getInstance(): RequestOrderUC {
@@ -31,10 +35,11 @@ export class RequestOrderUC {
       const recipe = await this.getRandomReceipe();
 
       // !! request ingredients
+      const result = await this.warehouseDriver.requestIngredients(recipe.id);
 
       const order = await this.orderDriver.create({
         recipeId: recipe.id,
-        //status: result ? EstatusOrder.PREPARING : EstatusOrder.PENDING,
+        status: result.data.code == 'REQ_ING_OK' ? EstatusOrder.PREPARING : EstatusOrder.PENDING,
       });
 
       return new ResponseBase(

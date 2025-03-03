@@ -23,8 +23,6 @@ async function startServer() {
     app.use(errorHandler);
 
     app.use(`/${config.baseUrl}/v${config.version}/order`, orderRouter);
-    // app.use('/auth',authRouter);
-    // app.use('/order',orderRouter);
 
     // Función para obtener las rutas registradas
     const getRoutes = () => {
@@ -49,7 +47,7 @@ async function startServer() {
     app
       .listen(PORT, () => {
         console.table(getRoutes()); // Imprime las rutas en formato tabla
-        console.log(`🚀 Server running at http://localhost:${PORT}`);
+        console.log(`🚀 Server running at http://localhost:${PORT}/${config.baseUrl}/v${config.version}`);
       })
       .on('error', (error) => {
         // gracefully handle error
