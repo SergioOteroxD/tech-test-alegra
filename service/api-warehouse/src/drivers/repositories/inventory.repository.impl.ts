@@ -50,4 +50,22 @@ export class InventoryRepository {
     await this.repository.update(ingredientId, data);
     return await this.repository.findOneBy({ ingredientId });
   }
+
+  async updatePlusInventory(ingredientId: number, quantityBought: number) {
+    await this.repository
+      .createQueryBuilder()
+      .update(Inventory)
+      .set({ quantity: () => `quantity + ${quantityBought}` })
+      .where('ingredient_id = :ingredientId', { ingredientId })
+      .execute();
+  }
+
+  async updateMenosInventory(ingredientId: number, quantityBought: number) {
+    await this.repository
+      .createQueryBuilder()
+      .update(Inventory)
+      .set({ quantity: () => `quantity - ${quantityBought}` })
+      .where('ingredient_id = :ingredientId', { ingredientId })
+      .execute();
+  }
 }

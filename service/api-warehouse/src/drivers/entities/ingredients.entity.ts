@@ -1,13 +1,6 @@
-import {
-  Column,
-  Entity,
-  Index,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, Index, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Inventory } from './inventory.entity';
-import { Purchases } from './purchases.entity';
+import { Purchases } from './purchase.entity';
 import { RecipeIngredients } from './recipe-ingredients.entity';
 
 @Entity('ingredients', { schema: 'public' })
@@ -24,9 +17,6 @@ export class Ingredients {
   @OneToMany(() => Purchases, (purchases) => purchases.ingredient)
   purchases: Purchases[];
 
-  @OneToMany(
-    () => RecipeIngredients,
-    (recipeIngredients) => recipeIngredients.ingredient
-  )
+  @OneToMany(() => RecipeIngredients, (recipeIngredients) => recipeIngredients.ingredient)
   recipeIngredients: RecipeIngredients[];
 }

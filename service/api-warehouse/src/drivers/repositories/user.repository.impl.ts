@@ -1,4 +1,3 @@
-// src/infrastructure/repositories/TypeORMUserRepository.ts
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../database/postgres.connect';
 import { User } from '../entities/user.entity';

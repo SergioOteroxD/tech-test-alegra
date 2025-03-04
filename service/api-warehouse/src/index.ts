@@ -4,6 +4,7 @@ import { config } from './common/config';
 import ingredientsRouter from './adapters/routes/ingredients.routes';
 import { requestHttpInterceptorHandler } from './adapters/lib/request-http.interceptor';
 import { errorHandler } from './adapters/lib/excepcion-manager.filter';
+import './adapters/event/warehouse.subcriber';
 
 // configures dotenv to work in your application
 const app = express();

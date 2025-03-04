@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
 import { publisherClient, subscriberClient } from '../database/redis.connect';
+import { EwarehouseEvent } from '../../common/enum/warehouse-event.enum';
 
 export class EventDriver {
   private static instance: EventDriver;
@@ -19,15 +20,27 @@ export class EventDriver {
     return EventDriver.instance;
   }
 
-  async publish(channel: string, data: any): Promise<any> {
+  async publish<T>(channel: EwarehouseEvent, data: T): Promise<any> {
     this.redisPubDriver.publish(channel, JSON.stringify(data));
   }
 
-  async subscribe(channels: string[]): Promise<any> {
-    return await this.redisSubDriver.subscribe(...channels);
+  async subscribe(channels: EwarehouseEvent[]): Promise<any> {
+    const channelStrings = channels.map((channel) => channel.toString());
+    return await this.redisSubDriver.subscribe(...channelStrings, (err, count) => {
+      if (err) {
+        console.error('❌ Error al suscribirse a Redis:', err);
+      } else {
+        console.log(`🔔 Suscrito a ${count} canal(es)`);
+      }
+    });
   }
 
-  async on(cb: (channel: string, message: string) => void): Promise<any> {
-    return this.redisSubDriver.on('message', cb);
+  async psubscribe(channels: EwarehouseEvent[]): Promise<any> {
+    const channelStrings = channels.map((channel) => channel.toString());
+    return await this.redisSubDriver.psubscribe(...channelStrings);
+  }
+
+  async on(event: string, cb: (...args: any[]) => void): Promise<any> {
+    return this.redisSubDriver.on(event, cb);
   }
 }

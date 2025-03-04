@@ -4,22 +4,26 @@ import { RecipeRepository } from '../../drivers/repositories/recipe.repository.i
 import { CacheDriver } from '../../drivers/repositories/cache-manager.dirver.impl';
 import { Recipes } from '../../drivers/entities/recipes.entity';
 import { InventoryRepository } from '../../drivers/repositories/inventory.repository.impl';
-import { EstatusOrder } from '../../common/enum/status-order.enum';
-import { EventDriver } from '../../drivers/repositories/event.driver.impl';
 import { IreuqestIngredientData } from '../model/operation/request-ingredient-data.model';
+import { ImissingIngredients } from '../model/operation/event-buy-ingredients-data.model';
+import { BuyIngredientsUC } from './buy-ingredients.uc';
+import { OrderRepository } from '../../drivers/repositories/order.repository.impl';
+import { EstatusOrder } from '../../common/enum/status-order.enum';
 
 export class RequestIngredientsUC {
   private static instance: RequestIngredientsUC;
   private recipeDriver: RecipeRepository;
   private inventoryDriver: InventoryRepository;
   private cacheDriver: CacheDriver;
-  private eventDriver: EventDriver;
+  private buyIngredientsUc: BuyIngredientsUC;
+  private orderDriver: OrderRepository;
 
   constructor() {
     this.recipeDriver = RecipeRepository.getInstance();
     this.cacheDriver = CacheDriver.getInstance();
     this.inventoryDriver = InventoryRepository.getInstance();
-    this.eventDriver = EventDriver.getInstance();
+    this.buyIngredientsUc = BuyIngredientsUC.getInstance();
+    this.orderDriver = OrderRepository.getInstance();
   }
 
   public static getInstance(): RequestIngredientsUC {
@@ -38,8 +42,12 @@ export class RequestIngredientsUC {
       if (!recipes) {
         recipes = await this.recipeDriver.findAll(
           {},
-          { id: true, name: true, recipeIngredients: true },
-          { recipeIngredients: true },
+          {
+            id: true,
+            name: true,
+            recipeIngredients: { ingredientId: true, quantity: true, ingredient: { name: true } },
+          },
+          { recipeIngredients: { ingredient: true } },
         );
         await this.cacheDriver.set('data.recipes', recipes);
       }
@@ -60,30 +68,28 @@ export class RequestIngredientsUC {
         recipe.recipeIngredients.map((ingredient) => ({ ingredientId: ingredient.ingredientId })),
       );
 
-      const { result, message, data } = this.heckIngredients(recipe.recipeIngredients, inventory);
+      const { result, message, data } = this.heckIngredients(
+        recipe.recipeIngredients.map((v, i, a) => {
+          return {
+            recipeId: v.recipeId,
+            ingredientId: v.ingredientId,
+            name: v.ingredient.name,
+            quantity: v.quantity,
+          };
+        }),
+        inventory,
+      );
 
       if (!result) {
         // Crear evento para comprar ingredientes
-        for (const { ingredientId, missingQuantity } of data) {
-          await this.eventDriver.publish(`buy-ingredients:${ingredientId}`, { ingredientId, missingQuantity });
-        }
-        return new ResponseBase(
-          {
-            code: 'REQ_ING_BUY_ING',
-            message: message,
-            status: 400,
-          },
-          data,
-        );
-      } else {
-        // descontar ingredientes del inventario
-        for (const { ingredientId, quantity } of recipe.recipeIngredients) {
-          const actualQuantity = inventory.find((item) => item.ingredientId === ingredientId)?.quantity;
-          if (actualQuantity) {
-            await this.inventoryDriver.update(ingredientId, { quantity: actualQuantity - quantity });
-          }
-        }
+        await this.buyIngredientsUc.buyIngredients(data);
       }
+      // descontar ingredientes del inventario
+      for (const { ingredientId, quantity } of recipe.recipeIngredients) {
+        await this.inventoryDriver.updateMenosInventory(ingredientId, quantity);
+      }
+
+      this.orderDriver.update(dataBody.orderId, { status: EstatusOrder.PREPARING });
 
       return new ResponseBase(
         {
@@ -104,23 +110,22 @@ export class RequestIngredientsUC {
     const missingIngredients: ImissingIngredients[] = [];
 
     // Verificar si hay suficientes ingredientes
-    for (const { ingredientId, quantity } of recipeIngredients) {
+    for (const { ingredientId, quantity, name } of recipeIngredients) {
       const available = inventoryMap.get(ingredientId) ?? 0;
       // Si no hay suficientes ingredientes, agregar a la lista de faltantes
       if (available < quantity) {
         missingIngredients.push({
           ingredientId,
           missingQuantity: quantity - available,
+          name,
         });
       }
     }
 
     // Si no hay ingredientes faltantes, retornar mensaje de éxito
     if (missingIngredients.length === 0) {
-      console.log('✅ Tienes suficientes ingredientes para la receta.');
       return { result: true, message: '✅ Tienes suficientes ingredientes para la receta.', data: [] };
     } else {
-      console.log('❌ No tienes suficientes ingredientes. Debes comprar:');
       missingIngredients.forEach(({ ingredientId, missingQuantity }) => {
         console.log(`- Ingrediente ${ingredientId}: Faltan ${missingQuantity} unidades.`);
       });
@@ -139,6 +144,7 @@ export class RequestIngredientsUC {
 
 interface IrecipeIngredients {
   recipeId: number;
+  name: string;
   ingredientId: number;
   quantity: number;
 }
@@ -152,9 +158,4 @@ interface Iresult {
   result: boolean;
   message: string;
   data: ImissingIngredients[];
-}
-
-interface ImissingIngredients {
-  ingredientId: number;
-  missingQuantity: number;
 }
