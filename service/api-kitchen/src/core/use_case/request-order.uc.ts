@@ -4,22 +4,21 @@ import { OrderRepository } from '../../drivers/repositories/order.repository.imp
 import { RecipeRepository } from '../../drivers/repositories/recipe.repository.impl';
 import { CacheDriver } from '../../drivers/repositories/cache-manager.driver.impl';
 import { Recipes } from '../../drivers/entities/recipes.entity';
-import { WarehouseDriver } from '../../drivers/repositories/warehouse.driver.impl';
-import { EstatusOrder } from '../../common/enum/status-order.enum';
+import { TaskQueueDriver } from '../../drivers/repositories/task-queue.driver.impl';
 
 export class RequestOrderUC {
   private static instance: RequestOrderUC;
 
   private orderDriver: OrderRepository;
-  private warehouseDriver: WarehouseDriver;
   private recipeDriver: RecipeRepository;
   private cacheDriver: CacheDriver;
+  private taskDriver: TaskQueueDriver;
 
   constructor() {
     this.orderDriver = OrderRepository.getInstance();
     this.recipeDriver = RecipeRepository.getInstance();
     this.cacheDriver = CacheDriver.getInstance();
-    this.warehouseDriver = WarehouseDriver.getInstance();
+    this.taskDriver = TaskQueueDriver.getInstance();
   }
 
   public static getInstance(): RequestOrderUC {
@@ -34,13 +33,11 @@ export class RequestOrderUC {
     try {
       const recipe = await this.getRandomReceipe();
 
-      // !! request ingredients
-      const result = await this.warehouseDriver.requestIngredients(recipe.id);
-
       const order = await this.orderDriver.create({
         recipeId: recipe.id,
-        status: result.data.code == 'REQ_ING_OK' ? EstatusOrder.PREPARING : EstatusOrder.PENDING,
       });
+
+      await this.taskDriver.add({ recipeId: recipe.id, orderId: order.id });
 
       return new ResponseBase(
         {
@@ -64,8 +61,8 @@ export class RequestOrderUC {
     if (!recipes) {
       recipes = await this.recipeDriver.findAll(
         {},
-        { id: true, name: true, recipeIngredients: true },
-        { recipeIngredients: true },
+        { id: true, name: true, recipeIngredients: { ingredientId: true, quantity: true, ingredient: { name: true } } },
+        { recipeIngredients: { ingredient: true } },
       );
       await this.cacheDriver.set('data.recipes', recipes);
     }

@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { apisConfig } from '../../common/config';
 import { CustomError } from '../../common/types/custom-error';
 import { IresponseBase } from '../../common/types/response-base.model';
@@ -28,11 +28,9 @@ export class WarehouseDriver {
     return response.data;
   }
 
-  async requestIngredients<T>(recipeId: number): Promise<{ data: IresponseBase<{}> }> {
+  async requestIngredients<T>(data: { recipeId: number; orderId: number }): Promise<{ data: IresponseBase<{}> }> {
     try {
-      const response = await this.client.post<{ data: IresponseBase<{}> }>('/ingredient/request-ingredients', {
-        recipeId,
-      });
+      const response = await this.client.post<{ data: IresponseBase<{}> }>('/ingredient/request-ingredients', data);
       return response.data;
     } catch (error) {
       if (error?.response?.data.code === 'REQ_ING_BUY_ING') {

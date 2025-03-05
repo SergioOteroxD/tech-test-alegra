@@ -23,7 +23,7 @@ export class QueryOrderUC {
     // Buscar al usuario por el correo electrónico
     try {
       const filter = {};
-      if (_filter.status.length > 0) filter['status'] = { $in: _filter.status };
+      if (_filter?.status?.length > 0) filter['status'] = { $in: _filter.status };
       if (_filter.recipeId) filter[''] = { $in: _filter.status };
 
       const total: number = await this.orderDriver.getTotal(filter);

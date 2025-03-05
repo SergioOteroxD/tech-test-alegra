@@ -20,7 +20,8 @@ export class EventDriver {
   }
 
   async publish(channel: string, data: any): Promise<any> {
-    this.redisPubDriver.publish(channel, JSON.stringify(data));
+    console.log(`💡 Mensaje recibido en el canal ${channel}:`, data);
+    return await this.redisPubDriver.publish(channel, JSON.stringify(data));
   }
 
   async subscribe(channels: string[]): Promise<any> {
