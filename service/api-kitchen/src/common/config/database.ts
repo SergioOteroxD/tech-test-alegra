@@ -10,7 +10,7 @@ export const databaseConfig = {
     database: process.env.DB_NAME,
   },
   redis: {
-    host: process.env.REDIS_HOST || 'localhost',
+    host: process.env.REDIS_HOST || 'redis',
     port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379,
     timeOut: process.env.REDIS_TIME_OUT ? parseInt(process.env.REDIS_TIME_OUT) : 120,
     password: process.env.REDIS_PASSWORD || undefined,

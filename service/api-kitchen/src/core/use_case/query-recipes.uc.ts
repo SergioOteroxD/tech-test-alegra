@@ -1,33 +1,29 @@
-import { In } from 'typeorm';
 import { CustomError } from '../../common/types/custom-error';
 import { IresponseBase, ResponseBase, ResponseQuery } from '../../common/types/response-base.model';
-import { OrderRepository } from '../../drivers/repositories/order.repository.impl';
-import { IfilterOrder } from '../model/filter/filter-order.model';
+import { RecipeRepository } from '../../drivers/repositories/recipe.repository.impl';
 
-export class QueryOrderUC {
-  private static instance: QueryOrderUC;
+export class QueryRecipesUC {
+  private static instance: QueryRecipesUC;
 
-  private orderDriver: OrderRepository;
+  private recipesDriver: RecipeRepository;
 
   constructor() {
-    this.orderDriver = OrderRepository.getInstance();
+    this.recipesDriver = RecipeRepository.getInstance();
   }
 
-  public static getInstance(): QueryOrderUC {
-    if (!QueryOrderUC.instance) {
-      QueryOrderUC.instance = new QueryOrderUC();
+  public static getInstance(): QueryRecipesUC {
+    if (!QueryRecipesUC.instance) {
+      QueryRecipesUC.instance = new QueryRecipesUC();
     }
-    return QueryOrderUC.instance;
+    return QueryRecipesUC.instance;
   }
 
-  async getAll(page: number, limit: number, _filter: IfilterOrder): Promise<IresponseBase> {
+  async getAll(page: number, limit: number): Promise<IresponseBase> {
     // Buscar al usuario por el correo electrónico
     try {
       const filter = {};
-      if (_filter?.status?.length > 0) filter['status'] = In(_filter.status);
-      if (_filter.recipeId) filter['recipeId'] = _filter.recipeId;
 
-      const total: number = await this.orderDriver.getTotal(filter);
+      const total: number = await this.recipesDriver.getTotal(filter);
 
       if (total == 0)
         return new ResponseBase({
@@ -36,12 +32,23 @@ export class QueryOrderUC {
           status: 404,
         });
 
-      const data = await this.orderDriver.getAll(
+      const data = await this.recipesDriver.getAll(
         page,
         limit,
         filter,
-        { recipe: true },
-        { id: true, createdAt: true, recipe: { name: true, id: true }, status: true, recipeId: true, updatedAt: true },
+        { recipeIngredients: { ingredient: true } },
+        {
+          id: true,
+          name: true,
+          recipeIngredients: {
+            ingredient: { name: true, id: true },
+            ingredientId: true,
+            quantity: true,
+            recipeId: true,
+          },
+          createdAt: true,
+          updatedAt: true,
+        },
         { createdAt: 'DESC' },
       );
 
@@ -61,7 +68,7 @@ export class QueryOrderUC {
   async getOne(orderId: number): Promise<IresponseBase> {
     // Buscar al usuario por el correo electrónico
     try {
-      const data = await this.orderDriver.getById(orderId);
+      const data = await this.recipesDriver.getById(orderId);
       if (!data)
         return new ResponseBase({
           code: 'NOT_FOUND',

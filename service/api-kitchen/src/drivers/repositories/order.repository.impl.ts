@@ -1,4 +1,4 @@
-import { FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsOrder, FindOptionsRelations, FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
 import { AppDataSource } from '../database/postgres.connect';
 import { CustomError } from '../../common/types/custom-error';
 import { Orders } from '../entities/orders.entity';
@@ -19,7 +19,7 @@ export class OrderRepository {
     return OrderRepository.instance;
   }
 
-  async create(orders: Omit<Orders, 'id' | 'createdAt' | 'updatedAt'>): Promise<Orders> {
+  async create(orders: Partial<Orders>): Promise<Orders> {
     try {
       const newOrders = this.repository.create(orders);
       return await this.repository.save(newOrders);
@@ -28,21 +28,27 @@ export class OrderRepository {
     }
   }
 
-  async getById(id: number): Promise<Orders | null> {
-    return await this.repository.findOneBy({ id });
+  async getById(
+    id: number,
+    relations?: FindOptionsRelations<Orders>,
+    select?: FindOptionsSelect<Orders>,
+  ): Promise<Orders | null> {
+    return await this.repository.findOne({ where: { id }, relations, select });
   }
 
   async getAll(
     page: number,
     limit: number,
     filter: FindOptionsWhere<Orders>,
+    relations?: FindOptionsRelations<Orders>,
     projection?: FindOptionsSelect<Orders>,
     sort?: FindOptionsOrder<Orders>,
   ): Promise<Orders[]> {
     return await this.repository.find({
       where: filter,
       take: limit,
-      skip: page * limit,
+      skip: limit * (page - 1),
+      relations,
       select: projection,
       order: sort,
     });
