@@ -27,6 +27,32 @@ services:
       - app_network
     command: redis-server --appendonly yes  # Habilita persistencia AOF
 
+  kitchen-service:
+    build: ./service/api-kitchen
+    container_name: api-kitchen
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./service/api-kitchen/.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app_network 
+
+  warehouse-service:
+    build: ./service/api-warehouse
+    container_name: api-warehouse
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./service/api-warehouse/.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app_network 
+
 volumes:
   postgres_data:
   redis_data:
