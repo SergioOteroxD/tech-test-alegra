@@ -42,7 +42,7 @@ export class RecipeRepository {
     return await this.repository.find({
       where: filter,
       take: limit,
-      skip: page * limit,
+      skip: limit * (page - 1),
       select: projection,
       order: sort,
     });

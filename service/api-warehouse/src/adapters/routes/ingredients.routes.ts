@@ -1,27 +1,21 @@
 import express from 'express';
 import { IngredientsController } from '../api/ingredients.controller';
-import { body, validationResult } from 'express-validator';
-import { ResponseUtil } from '../../common/util/response.util';
+import { body, query } from 'express-validator';
+import { validateMiddleware } from '../middleware/validate.middleware';
 
 const ingredientsRouter = express.Router();
 // Instancia del controlador de autenticación
 const inventoryController = new IngredientsController();
 
-ingredientsRouter.post(
-  '/request-ingredients',
-  body('recipeId').isInt({ min: 1, max: 12 }).notEmpty(),
+ingredientsRouter.get(
+  '/',
+  [
+    query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer').toInt(),
+    query('limit').optional().isInt({ min: 1 }).withMessage('Limit must be a positive integer').toInt(),
+  ],
+  validateMiddleware,
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      ResponseUtil.success(res, {
-        code: 'VALIDATION_ERROR',
-        message: 'Asegúrate que lo valores estén bien',
-        status: 400,
-        data: { errors: errors.array() },
-      });
-      return;
-    }
-    await inventoryController.requestIngredients(req, res);
+    await inventoryController.getAll(req, res);
   },
 );
 

@@ -13,4 +13,18 @@ export class Inventory implements Iinventory {
   @OneToOne(() => Ingredients, (ingredients) => ingredients.inventory)
   @JoinColumn([{ name: 'ingredient_id', referencedColumnName: 'id' }])
   ingredient: Ingredients;
+
+  @Column('timestamp without time zone', {
+    name: 'created_at',
+    nullable: true,
+    default: () => 'now()',
+  })
+  createdAt: Date;
+
+  @Column('timestamp without time zone', {
+    name: 'updated_at',
+    nullable: true,
+    default: () => 'now()',
+  })
+  updatedAt: Date;
 }

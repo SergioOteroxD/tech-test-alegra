@@ -1,4 +1,4 @@
-import { FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsOrder, FindOptionsRelations, FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
 import { AppDataSource } from '../database/postgres.connect';
 import { Inventory } from '../entities/inventory.entity';
 
@@ -22,17 +22,23 @@ export class InventoryRepository {
     return await this.repository.findOneBy({ ingredientId });
   }
 
+  async getTotal(filter: FindOptionsWhere<Inventory>): Promise<number> {
+    return await this.repository.count({ where: filter });
+  }
+
   async getAll(
     page: number,
     limit: number,
     filter: FindOptionsWhere<Inventory>,
+    relations?: FindOptionsRelations<Inventory>,
     projection?: FindOptionsSelect<Inventory>,
     sort?: FindOptionsOrder<Inventory>,
   ): Promise<Inventory[]> {
     return await this.repository.find({
       where: filter,
       take: limit,
-      skip: page * limit,
+      skip: limit * (page - 1),
+      relations,
       select: projection,
       order: sort,
     });

@@ -5,6 +5,7 @@ import ingredientsRouter from './adapters/routes/ingredients.routes';
 import { requestHttpInterceptorHandler } from './adapters/lib/request-http.interceptor';
 import { errorHandler } from './adapters/lib/excepcion-manager.filter';
 import './adapters/event/warehouse.subcriber';
+import purchasesRouter from './adapters/routes/purchases.routes';
 
 // configures dotenv to work in your application
 const app = express();
@@ -24,6 +25,7 @@ async function startServer() {
     app.use(errorHandler);
 
     app.use(`/${config.baseUrl}/v${config.version}/ingredient`, ingredientsRouter);
+    app.use(`/${config.baseUrl}/v${config.version}/purchases`, purchasesRouter);
 
     // Función para obtener las rutas registradas
     const getRoutes = () => {

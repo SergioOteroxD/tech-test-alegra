@@ -11,7 +11,7 @@ export const AppDataSource = new DataSource({
   username: databaseConfig.postgres.user,
   password: databaseConfig.postgres.password,
   database: databaseConfig.postgres.database,
-  synchronize: true, // Usar solo en desarrollo
+  synchronize: false, // Usar solo en desarrollo
   logging: false,
   entities: [__dirname + '/../entities/*.entity{.ts,.js}'], // Ruta a las entidades
 });
