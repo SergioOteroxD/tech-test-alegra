@@ -4,6 +4,8 @@ import { config } from './common/config';
 import orderRouter from './adapters/routes/order.routes';
 import { requestHttpInterceptorHandler } from './adapters/lib/request-http.interceptor';
 import { errorHandler } from './adapters/lib/excepcion-manager.filter';
+import './adapters/event/kitchen.subscirber';
+import recipesRouter from './adapters/routes/recipes.routes';
 
 // configures dotenv to work in your application
 const app = express();
@@ -19,11 +21,21 @@ async function startServer() {
     app.use(express.json());
     // Interceptor
     app.use(requestHttpInterceptorHandler);
-    // Error handling
-    app.use(errorHandler);
 
     app.use(`/${config.baseUrl}/v${config.version}/order`, orderRouter);
+    app.use(`/${config.baseUrl}/v${config.version}/recipes`, recipesRouter);
 
+    // Error handling
+    app.use(errorHandler);
+    // Middleware para manejar rutas no encontradas (404)
+    app.use((req, res, next) => {
+      res.status(404).json({
+        code: 'NOT_FOUND',
+        message: 'La ruta solicitada no existe',
+        status: 404,
+        data: null,
+      });
+    });
     // Función para obtener las rutas registradas
     const getRoutes = () => {
       const routes: { method: string; path: any }[] = [];

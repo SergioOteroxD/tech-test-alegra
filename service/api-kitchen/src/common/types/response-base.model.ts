@@ -1,9 +1,11 @@
+import { Ipaginator, Paginator } from './paginator.model';
+
 export interface IresponseBase<T = any> {
   code: string;
   message: string;
   status: number;
   data?: T;
-  // pagination?: Ipaginator;
+  pagination?: Ipaginator;
 }
 
 export class ResponseBase<T = any> implements IresponseBase<T> {
@@ -21,8 +23,7 @@ export class ResponseBase<T = any> implements IresponseBase<T> {
 export class ResponseQuery<T = any> implements IresponseBase<T> {
   public code: string;
   public message: string;
-  public status: number;
-  // public pagination?: Ipaginator;
+  public pagination?: Ipaginator;
 
   constructor(
     responseCode: { code: string; message: string; status: number },
@@ -30,7 +31,9 @@ export class ResponseQuery<T = any> implements IresponseBase<T> {
     page: number,
     limit: number,
     total: number,
+    public status: number = 200,
   ) {
     Object.assign(this, responseCode);
+    this.pagination = new Paginator(total, page, limit);
   }
 }

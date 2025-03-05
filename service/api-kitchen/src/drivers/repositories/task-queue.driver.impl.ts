@@ -1,12 +1,15 @@
 import Bull, { Queue } from 'bull';
-import { taskQueue } from '../database/redis.connect';
+import { buyIngredientQueue, sendIngredientQueue } from '../database/redis.connect';
+import { EwarehouseTask } from '../../common/enum/warehouse-queue.enum';
 
 export class TaskQueueDriver {
   private static instance: TaskQueueDriver;
-  private taskQueue: Queue;
+  private buyIngredient: Queue;
+  private getIngrdient: Queue;
 
   constructor() {
-    this.taskQueue = taskQueue;
+    this.buyIngredient = buyIngredientQueue;
+    this.getIngrdient = sendIngredientQueue;
   }
 
   // Método para obtener la instancia única
@@ -17,12 +20,22 @@ export class TaskQueueDriver {
     return TaskQueueDriver.instance;
   }
 
-  async add(data: any): Promise<any> {
-    console.log(`💡 Tarea enviada:`, data);
-    return await this.taskQueue.add(data);
+  async add(queue: EwarehouseTask, data: any): Promise<any> {
+    console.log(`💡 Tarea enviada ${queue.toString()}`, data);
+    if (queue === EwarehouseTask.BUY_INGREDIENT) {
+      return await this.buyIngredient.add(data);
+    }
+    if (queue === EwarehouseTask.SEND_INGREDIENT) {
+      return await this.getIngrdient.add(data);
+    }
   }
 
-  async process(callback: Bull.ProcessCallbackFunction<any>): Promise<any> {
-    return await this.taskQueue.process(callback);
+  async process(queue: EwarehouseTask, callback: Bull.ProcessCallbackFunction<any>): Promise<any> {
+    if (queue === EwarehouseTask.BUY_INGREDIENT) {
+      return await this.buyIngredient.process(callback);
+    }
+    if (queue === EwarehouseTask.SEND_INGREDIENT) {
+      return await this.getIngrdient.process(callback);
+    }
   }
 }

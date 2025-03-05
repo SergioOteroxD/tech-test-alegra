@@ -32,17 +32,23 @@ export class RecipeRepository {
     return await this.repository.findOneBy({ id });
   }
 
+  async getTotal(filter: FindOptionsWhere<Recipes>): Promise<number> {
+    return await this.repository.count({ where: filter });
+  }
+
   async getAll(
     page: number,
     limit: number,
     filter: FindOptionsWhere<Recipes>,
+    relations?: FindOptionsRelations<Recipes>,
     projection?: FindOptionsSelect<Recipes>,
     sort?: FindOptionsOrder<Recipes>,
   ): Promise<Recipes[]> {
     return await this.repository.find({
       where: filter,
       take: limit,
-      skip: page * limit,
+      skip: limit * (page - 1),
+      relations,
       select: projection,
       order: sort,
     });

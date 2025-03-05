@@ -5,6 +5,7 @@ import { RecipeRepository } from '../../drivers/repositories/recipe.repository.i
 import { CacheDriver } from '../../drivers/repositories/cache-manager.driver.impl';
 import { Recipes } from '../../drivers/entities/recipes.entity';
 import { TaskQueueDriver } from '../../drivers/repositories/task-queue.driver.impl';
+import { EwarehouseTask } from '../../common/enum/warehouse-queue.enum';
 
 export class RequestOrderUC {
   private static instance: RequestOrderUC;
@@ -37,7 +38,8 @@ export class RequestOrderUC {
         recipeId: recipe.id,
       });
 
-      await this.taskDriver.add({ recipeId: recipe.id, orderId: order.id });
+      // Agregar tarea de traer ingredientes
+      await this.taskDriver.add(EwarehouseTask.BUY_INGREDIENT, { recipeId: recipe.id, orderId: order.id });
 
       return new ResponseBase(
         {
