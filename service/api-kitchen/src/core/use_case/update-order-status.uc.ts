@@ -3,14 +3,18 @@ import { CustomError } from '../../common/types/custom-error';
 import { IresponseBase, ResponseBase } from '../../common/types/response-base.model';
 import { OrderRepository } from '../../drivers/repositories/order.repository.impl';
 import { IupdateOrderStatusData } from '../model/operations/update-order-status-data.model';
+import { WebSocketDriver } from '../../drivers/repositories/web-socket.driver.impl';
+import { EwebSocketEvent } from '../../common/enum/web-socket.event';
 
 export class UpdateOrderStatusUC {
   private static instance: UpdateOrderStatusUC;
 
   private orderDriver: OrderRepository;
+  private ws: WebSocketDriver;
 
   constructor() {
     this.orderDriver = OrderRepository.getInstance();
+    this.ws = WebSocketDriver.getInstance();
   }
 
   public static getInstance(): UpdateOrderStatusUC {
@@ -48,6 +52,7 @@ export class UpdateOrderStatusUC {
       // Agregar tarea de traer ingredientes
       await this.orderDriver.update(orderId, data);
 
+      this.ws.broadcast(EwebSocketEvent.ORDER_UPDATE, { orderId, ...data });
       return new ResponseBase(
         {
           code: 'UPD_ORDER_OK',

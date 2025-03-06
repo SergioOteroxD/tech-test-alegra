@@ -1,7 +1,16 @@
-import { FindOptionsOrder, FindOptionsRelations, FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsSelect,
+  FindOptionsWhere,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { AppDataSource } from '../database/postgres.connect';
 import { CustomError } from '../../common/types/custom-error';
 import { Orders } from '../entities/orders.entity';
+import { WebSocketDriver } from './web-socket.driver.impl';
+import { EwebSocketEvent } from '../../common/enum/web-socket.event';
 
 export class OrderRepository {
   private static instance: OrderRepository;
@@ -20,8 +29,8 @@ export class OrderRepository {
   }
 
   async create(orders: Partial<Orders>): Promise<Orders> {
+    const newOrders = this.repository.create(orders);
     try {
-      const newOrders = this.repository.create(orders);
       return await this.repository.save(newOrders);
     } catch (error) {
       throw new CustomError({ message: 'ERROR', code: 500 }, 'IOrdersRepository.create', 'Business');
@@ -57,8 +66,9 @@ export class OrderRepository {
   async getTotal(filter: FindOptionsWhere<Orders>): Promise<number> {
     return await this.repository.count({ where: filter });
   }
-  async update(id: number, data: Partial<Orders>): Promise<Orders | null> {
-    await this.repository.update(id, data);
-    return await this.repository.findOneBy({ id });
+  async update(id: number, data: Partial<Orders>): Promise<UpdateResult> {
+    try {
+      return await this.repository.update(id, data);
+    } catch (error) {}
   }
 }

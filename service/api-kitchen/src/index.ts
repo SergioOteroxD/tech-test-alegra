@@ -1,14 +1,22 @@
 import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import { Server } from 'socket.io';
 import { AppDataSource } from './drivers/database/postgres.connect';
 import { config } from './common/config';
-import orderRouter from './adapters/routes/order.routes';
 import { requestHttpInterceptorHandler } from './adapters/lib/request-http.interceptor';
 import { errorHandler } from './adapters/lib/excepcion-manager.filter';
-import './adapters/event/kitchen.subscirber';
+import orderRouter from './adapters/routes/order.routes';
 import recipesRouter from './adapters/routes/recipes.routes';
+import './adapters/event/task-queue.subscriber';
 
 // configures dotenv to work in your application
 const app = express();
+const server = http.createServer(app); // Crear servidor HTTP para WebSockets
+export const webSocket = new Server(server, {
+  cors: { origin: '*' },
+});
+import './adapters/event/web-socket.subcriber';
 
 const PORT = config.port;
 
@@ -21,6 +29,8 @@ async function startServer() {
     app.use(express.json());
     // Interceptor
     app.use(requestHttpInterceptorHandler);
+
+    app.use(cors());
 
     app.use(`/${config.baseUrl}/v${config.version}/order`, orderRouter);
     app.use(`/${config.baseUrl}/v${config.version}/recipes`, recipesRouter);
@@ -56,7 +66,7 @@ async function startServer() {
     };
 
     // Iniciar el servidor HTTP
-    app
+    server
       .listen(PORT, () => {
         console.table(getRoutes()); // Imprime las rutas en formato tabla
         console.log(`🚀 Server running at http://localhost:${PORT}/${config.baseUrl}/v${config.version}`);

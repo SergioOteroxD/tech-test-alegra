@@ -8,5 +8,5 @@ export const config = {
   baseUrl: process.env.BASE_URL || 'api',
   version: process.env.VERSION || '1',
   jwtSecret: process.env.JWT_SECRET || 'secret',
-  jwtExpire: process.env.EXPIRES_JWT as StringValue || '1h',
+  jwtExpire: (process.env.EXPIRES_JWT as StringValue) || '1h',
 };

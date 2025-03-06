@@ -6,6 +6,9 @@ import { CacheDriver } from '../../drivers/repositories/cache-manager.driver.imp
 import { Recipes } from '../../drivers/entities/recipes.entity';
 import { TaskQueueDriver } from '../../drivers/repositories/task-queue.driver.impl';
 import { EwarehouseTask } from '../../common/enum/warehouse-queue.enum';
+import { WebSocketDriver } from '../../drivers/repositories/web-socket.driver.impl';
+import { EwebSocketEvent } from '../../common/enum/web-socket.event';
+import { EstatusOrder } from '../../common/enum/status-order.enum';
 
 export class RequestOrderUC {
   private static instance: RequestOrderUC;
@@ -14,12 +17,14 @@ export class RequestOrderUC {
   private recipeDriver: RecipeRepository;
   private cacheDriver: CacheDriver;
   private taskDriver: TaskQueueDriver;
+  private ws: WebSocketDriver;
 
   constructor() {
     this.orderDriver = OrderRepository.getInstance();
     this.recipeDriver = RecipeRepository.getInstance();
     this.cacheDriver = CacheDriver.getInstance();
     this.taskDriver = TaskQueueDriver.getInstance();
+    this.ws = WebSocketDriver.getInstance();
   }
 
   public static getInstance(): RequestOrderUC {
@@ -36,10 +41,18 @@ export class RequestOrderUC {
 
       const order = await this.orderDriver.create({
         recipeId: recipe.id,
+        status: EstatusOrder.PENDING,
       });
 
       // Agregar tarea de traer ingredientes
       await this.taskDriver.add(EwarehouseTask.BUY_INGREDIENT, { recipeId: recipe.id, orderId: order.id });
+
+      this.ws.broadcast(EwebSocketEvent.ORDER_CREATE, {
+        orderId: order.id,
+        status: order.status,
+        recipe: { id: recipe.id, name: recipe.name },
+        createdAt: order.createdAt,
+      });
 
       return new ResponseBase(
         {

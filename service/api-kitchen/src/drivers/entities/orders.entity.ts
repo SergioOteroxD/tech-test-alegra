@@ -9,7 +9,7 @@ export class Orders implements Iorders {
   @PrimaryGeneratedColumn({ type: 'integer', name: 'id' })
   id: number;
 
-  @Column('character varying', { name: 'status', nullable: true, length: 20 })
+  @Column('character varying', { name: 'status', length: 20 })
   status?: EstatusOrder;
 
   @Column('timestamp without time zone', {
