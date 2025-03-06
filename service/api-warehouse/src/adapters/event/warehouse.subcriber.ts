@@ -10,5 +10,5 @@ taskQueue.process(EwarehouseTask.BUY_INGREDIENT, (job) => {
   const taskData = job.data;
   // Lógica para procesar la tarea
   console.log('Processing task:', taskData);
-  requestIngredientsUc.requestOrder(taskData);
+  requestIngredientsUc.requestIngredients(taskData);
 });

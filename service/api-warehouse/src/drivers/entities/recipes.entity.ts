@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Orders } from './orders.entity';
 import { RecipeIngredients } from './recipe-ingredients.entity';
 import { Irecipe } from '../../core/model/recipe.model';
@@ -20,9 +14,20 @@ export class Recipes implements Irecipe {
   @OneToMany(() => Orders, (orders) => orders.recipe)
   orders: Orders[];
 
-  @OneToMany(
-    () => RecipeIngredients,
-    (recipeIngredients) => recipeIngredients.recipe
-  )
+  @OneToMany(() => RecipeIngredients, (recipeIngredients) => recipeIngredients.recipe)
   recipeIngredients: RecipeIngredients[];
+
+  @Column('timestamp without time zone', {
+    name: 'created_at',
+    nullable: true,
+    default: () => 'now()',
+  })
+  createdAt: Date;
+
+  @Column('timestamp without time zone', {
+    name: 'updated_at',
+    nullable: true,
+    default: () => 'now()',
+  })
+  updatedAt: Date;
 }

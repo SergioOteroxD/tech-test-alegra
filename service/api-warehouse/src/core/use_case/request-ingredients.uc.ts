@@ -34,7 +34,7 @@ export class RequestIngredientsUC {
     return RequestIngredientsUC.instance;
   }
 
-  async requestOrder(dataBody: IreuqestIngredientData): Promise<IresponseBase> {
+  async requestIngredients(dataBody: IreuqestIngredientData): Promise<IresponseBase> {
     // Buscar al usuario por el correo electrónico
     try {
       let recipes: Recipes[];

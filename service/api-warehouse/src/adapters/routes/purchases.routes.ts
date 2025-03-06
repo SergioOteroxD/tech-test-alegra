@@ -1,7 +1,7 @@
 import express from 'express';
 import { query } from 'express-validator';
 import { validateMiddleware } from '../middleware/validate.middleware';
-import { PurrchasesController } from '../api/purrchases.controller';
+import { PurrchasesController } from '../api/purchases.controller';
 
 const purchasesRouter = express.Router();
 // Instancia del controlador de autenticación
