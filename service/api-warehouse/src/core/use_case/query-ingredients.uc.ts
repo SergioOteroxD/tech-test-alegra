@@ -38,7 +38,14 @@ export class QueryInventoryUC {
         limit,
         filter,
         { ingredient: true },
-        { ingredientId: true, quantity: true, createdAt: true, updatedAt: true, ingredient: { id: true, name: true } },
+        {
+          id: true,
+          ingredientId: true,
+          quantity: true,
+          createdAt: true,
+          updatedAt: true,
+          ingredient: { id: true, name: true },
+        },
         { createdAt: 'DESC' },
       );
 

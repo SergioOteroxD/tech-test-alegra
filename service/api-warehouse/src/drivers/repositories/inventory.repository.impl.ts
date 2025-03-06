@@ -1,13 +1,17 @@
 import { FindOptionsOrder, FindOptionsRelations, FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
 import { AppDataSource } from '../database/postgres.connect';
 import { Inventory } from '../entities/inventory.entity';
+import { WebSocketDriver } from './web-socket.driver.impl';
+import { EwebSocketEvent } from '../../common/enum/web-socket.event';
 
 export class InventoryRepository {
   private static instance: InventoryRepository;
   private repository: Repository<Inventory>;
+  private ws: WebSocketDriver;
 
   constructor() {
     this.repository = AppDataSource.getRepository(Inventory);
+    this.ws = WebSocketDriver.getInstance();
   }
 
   // Método para obtener la instancia única
@@ -73,5 +77,7 @@ export class InventoryRepository {
       .set({ quantity: () => `quantity - ${quantityBought}` })
       .where('ingredient_id = :ingredientId', { ingredientId })
       .execute();
+    const result = await this.repository.findOneBy({ ingredientId });
+    this.ws.broadcast(EwebSocketEvent.INVENTORY_UPDATE, { result });
   }
 }

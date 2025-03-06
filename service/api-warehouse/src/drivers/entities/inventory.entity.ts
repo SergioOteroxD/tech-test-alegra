@@ -4,7 +4,10 @@ import { Iinventory } from '../../core/model/inventory.model';
 
 @Entity('inventory', { schema: 'public' })
 export class Inventory implements Iinventory {
-  @Column('integer', { primary: true, name: 'ingredient_id' })
+  @Column('integer', { primary: true, name: 'id' })
+  id: number;
+
+  @Column('integer', { name: 'ingredient_id' })
   ingredientId: number;
 
   @Column('integer', { name: 'quantity', default: () => '5' })
