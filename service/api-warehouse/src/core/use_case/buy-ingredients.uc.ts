@@ -27,6 +27,10 @@ export class BuyIngredientsUC {
       for (const ingredients of data) {
         const result = await this.marketDriver.buyIngredient(ingredients);
         await this.inventoryDriver.getById(ingredients.ingredientId);
+        if (result <= 0) {
+          console.warn('🚀 ~ BuyIngredientsUC ~ buyIngredients ~ result<=0:', result <= 0);
+        }
+        console.warn('🚀 ~ BuyIngredientsUC ~ buyIngredients ~ result>=0:', result >= 0);
         await this.inventoryDriver.updatePlusInventory(ingredients.ingredientId, result);
       }
     } catch (error) {
