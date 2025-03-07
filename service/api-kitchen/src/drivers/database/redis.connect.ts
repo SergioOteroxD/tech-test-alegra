@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import Queue from 'bull';
+import { Queue } from 'bullmq';
 import { databaseConfig } from '../../common/config';
 
 // Crear cliente Redis con la configuración del .env
@@ -10,11 +10,11 @@ export const redisClient = new Redis({
 });
 
 export const buyIngredientQueue = new Queue('buyIngrediente', {
-  redis: { port: databaseConfig.redis.port, host: databaseConfig.redis.host },
+  connection: { port: databaseConfig.redis.port, host: databaseConfig.redis.host },
 });
 
 export const sendIngredientQueue = new Queue('ingredientReady', {
-  redis: { port: databaseConfig.redis.port, host: databaseConfig.redis.host },
+  connection: { port: databaseConfig.redis.port, host: databaseConfig.redis.host },
 });
 
 console.log('🔴 Redis connected for Pub/Sub');
