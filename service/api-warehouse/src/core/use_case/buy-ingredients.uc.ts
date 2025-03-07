@@ -26,12 +26,8 @@ export class BuyIngredientsUC {
     try {
       for (const ingredients of data) {
         const result = await this.marketDriver.buyIngredient(ingredients);
-        const ingredient = await this.inventoryDriver.getById(ingredients.ingredientId);
-        console.log('🚀 ~ BuyIngredientsUC ~ buyIngredients ~ ingredients:', {
-          ingredientId: ingredients.ingredientId,
-          result,
-        });
-        const updata = await this.inventoryDriver.updatePlusInventory(ingredients.ingredientId, result);
+        await this.inventoryDriver.getById(ingredients.ingredientId);
+        await this.inventoryDriver.updatePlusInventory(ingredients.ingredientId, result);
       }
     } catch (error) {
       console.log('🚀 ~ EventBuyIngredientsUC ~ buyIngredients ~ error:', error);

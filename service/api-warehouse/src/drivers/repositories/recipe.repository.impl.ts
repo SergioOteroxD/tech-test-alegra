@@ -28,6 +28,10 @@ export class RecipeRepository {
     }
   }
 
+  async getTotal(filter: FindOptionsWhere<Recipes>): Promise<number> {
+    return await this.repository.count({ where: filter });
+  }
+
   async getById(id: number): Promise<Recipes | null> {
     return await this.repository.findOneBy({ id });
   }
@@ -36,13 +40,15 @@ export class RecipeRepository {
     page: number,
     limit: number,
     filter: FindOptionsWhere<Recipes>,
+    relations?: FindOptionsRelations<Recipes>,
     projection?: FindOptionsSelect<Recipes>,
     sort?: FindOptionsOrder<Recipes>,
   ): Promise<Recipes[]> {
     return await this.repository.find({
       where: filter,
       take: limit,
-      skip: page * limit,
+      skip: limit * (page - 1),
+      relations,
       select: projection,
       order: sort,
     });

@@ -1,13 +1,21 @@
 import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
 import { AppDataSource } from './drivers/database/postgres.connect';
 import { config } from './common/config';
 import ingredientsRouter from './adapters/routes/ingredients.routes';
 import { requestHttpInterceptorHandler } from './adapters/lib/request-http.interceptor';
 import { errorHandler } from './adapters/lib/excepcion-manager.filter';
 import './adapters/event/warehouse.subcriber';
+import purchasesRouter from './adapters/routes/purchases.routes';
 
 // configures dotenv to work in your application
 const app = express();
+const server = http.createServer(app); // Crear servidor HTTP para WebSockets
+export const webSocket = new Server(server, {
+  cors: { origin: '*' },
+});
+import './adapters/event/web-socket.subcriber';
 
 const PORT = config.port;
 
@@ -24,6 +32,7 @@ async function startServer() {
     app.use(errorHandler);
 
     app.use(`/${config.baseUrl}/v${config.version}/ingredient`, ingredientsRouter);
+    app.use(`/${config.baseUrl}/v${config.version}/purchases`, purchasesRouter);
 
     // Función para obtener las rutas registradas
     const getRoutes = () => {
@@ -45,7 +54,7 @@ async function startServer() {
     };
 
     // Iniciar el servidor HTTP
-    app
+    server
       .listen(PORT, () => {
         console.table(getRoutes()); // Imprime las rutas en formato tabla
         console.log(`🚀 Server running at http://localhost:${PORT}/${config.baseUrl}/v${config.version}`);

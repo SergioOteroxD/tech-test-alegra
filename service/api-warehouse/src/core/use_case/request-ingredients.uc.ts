@@ -7,8 +7,9 @@ import { InventoryRepository } from '../../drivers/repositories/inventory.reposi
 import { IreuqestIngredientData } from '../model/operation/request-ingredient-data.model';
 import { ImissingIngredients } from '../model/operation/event-buy-ingredients-data.model';
 import { BuyIngredientsUC } from './buy-ingredients.uc';
-import { OrderRepository } from '../../drivers/repositories/order.repository.impl';
 import { EstatusOrder } from '../../common/enum/status-order.enum';
+import { TaskQueueDriver } from '../../drivers/repositories/task-queue.driver.impl';
+import { EwarehouseTask } from '../../common/enum/warehouse-queue.enum';
 
 export class RequestIngredientsUC {
   private static instance: RequestIngredientsUC;
@@ -16,14 +17,14 @@ export class RequestIngredientsUC {
   private inventoryDriver: InventoryRepository;
   private cacheDriver: CacheDriver;
   private buyIngredientsUc: BuyIngredientsUC;
-  private orderDriver: OrderRepository;
+  private taskDriver: TaskQueueDriver;
 
   constructor() {
     this.recipeDriver = RecipeRepository.getInstance();
     this.cacheDriver = CacheDriver.getInstance();
     this.inventoryDriver = InventoryRepository.getInstance();
     this.buyIngredientsUc = BuyIngredientsUC.getInstance();
-    this.orderDriver = OrderRepository.getInstance();
+    this.taskDriver = TaskQueueDriver.getInstance();
   }
 
   public static getInstance(): RequestIngredientsUC {
@@ -33,7 +34,7 @@ export class RequestIngredientsUC {
     return RequestIngredientsUC.instance;
   }
 
-  async requestOrder(dataBody: IreuqestIngredientData): Promise<IresponseBase> {
+  async requestIngredients(dataBody: IreuqestIngredientData): Promise<IresponseBase> {
     // Buscar al usuario por el correo electrónico
     try {
       let recipes: Recipes[];
@@ -81,7 +82,7 @@ export class RequestIngredientsUC {
       );
 
       if (!result) {
-        // Crear evento para comprar ingredientes
+        // Comprar ingredientes faltantes
         await this.buyIngredientsUc.buyIngredients(data);
       }
       // descontar ingredientes del inventario
@@ -89,7 +90,8 @@ export class RequestIngredientsUC {
         await this.inventoryDriver.updateMenosInventory(ingredientId, quantity);
       }
 
-      this.orderDriver.update(dataBody.orderId, { status: EstatusOrder.PREPARING });
+      // enviar tarea a la cola de mensajes
+      this.taskDriver.add(EwarehouseTask.SEND_INGREDIENT, { orderId: dataBody.orderId });
 
       return new ResponseBase(
         {

@@ -23,4 +23,18 @@ export class Purchases implements Ipurchase {
   @ManyToOne(() => Ingredients, (ingredients) => ingredients.purchases)
   @JoinColumn([{ name: 'ingredient_id', referencedColumnName: 'id' }])
   ingredient: Ingredients;
+
+  @Column('timestamp without time zone', {
+    name: 'created_at',
+    nullable: true,
+    default: () => 'now()',
+  })
+  createdAt: Date;
+
+  @Column('timestamp without time zone', {
+    name: 'updated_at',
+    nullable: true,
+    default: () => 'now()',
+  })
+  updatedAt: Date;
 }

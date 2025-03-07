@@ -1,13 +1,14 @@
 import { Response } from 'express';
 import { ResponseUtil } from '../../common/util/response.util';
 import { CustomError } from '../../common/types/custom-error';
-import { QueryInventoryUC } from '../../core/use_case/query-ingredients.uc';
+import { QueryPurchasesUC } from '../../core/use_case/query-purchases.uc';
+import { query } from 'express-validator';
 
-export class IngredientsController {
-  private queryIngredientsUc: QueryInventoryUC;
+export class PurrchasesController {
+  private queryIngredientsUc: QueryPurchasesUC;
 
   constructor() {
-    this.queryIngredientsUc = QueryInventoryUC.getInstance();
+    this.queryIngredientsUc = QueryPurchasesUC.getInstance();
   }
 
   async getAll(req: any, res: Response): Promise<Response> {
@@ -15,7 +16,7 @@ export class IngredientsController {
       const page = req.query.page || 1;
       const limit = req.query.limit || 10;
       // Ejecutar el caso de uso de login
-      const response = await this.queryIngredientsUc.getAll(page, limit);
+      const response = await this.queryIngredientsUc.getAll(page, limit, req.query);
       return ResponseUtil.success(res, response);
     } catch (error) {
       console.log('🚀 ~ InventaryController ~ requestOrder ~ error:', error);
