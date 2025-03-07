@@ -18,5 +18,10 @@ new Worker(
       host: databaseConfig.redis.host,
       port: databaseConfig.redis.port,
     },
+
+    limiter: {
+      max: 1, // 👈 Solo permite un trabajo activo a la vez
+      duration: 1000, // (Opcional) Espera 1 segundo antes de procesar el siguiente
+    },
   },
 );
