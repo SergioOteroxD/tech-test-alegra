@@ -12,6 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app_network
 
@@ -52,6 +53,18 @@ services:
       - redis
     networks:
       - app_network 
+  
+
+  vite-app:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    restart: always
+    depends_on:
+      - warehouse-service
+      - kitchen-service
+    networks:
+      - app_network
 
 volumes:
   postgres_data:
