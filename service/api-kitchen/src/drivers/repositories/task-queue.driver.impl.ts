@@ -1,4 +1,4 @@
-import Bull, { Queue } from 'bull';
+import Bull, { Queue } from 'bullmq';
 import { buyIngredientQueue, sendIngredientQueue } from '../database/redis.connect';
 import { EwarehouseTask } from '../../common/enum/warehouse-queue.enum';
 
@@ -23,19 +23,10 @@ export class TaskQueueDriver {
   async add(queue: EwarehouseTask, data: any): Promise<any> {
     console.log(`💡 Tarea enviada ${queue.toString()}`, data);
     if (queue === EwarehouseTask.BUY_INGREDIENT) {
-      return await this.buyIngredient.add(data);
+      return await this.buyIngredient.add(queue, data);
     }
     if (queue === EwarehouseTask.SEND_INGREDIENT) {
-      return await this.getIngrdient.add(data);
-    }
-  }
-
-  async process(queue: EwarehouseTask, callback: Bull.ProcessCallbackFunction<any>): Promise<any> {
-    if (queue === EwarehouseTask.BUY_INGREDIENT) {
-      return await this.buyIngredient.process(callback);
-    }
-    if (queue === EwarehouseTask.SEND_INGREDIENT) {
-      return await this.getIngrdient.process(callback);
+      return await this.getIngrdient.add(queue, data);
     }
   }
 }

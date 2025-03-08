@@ -81,10 +81,9 @@ export class RequestIngredientsUC {
         inventory,
       );
 
-      if (!result) {
-        // Comprar ingredientes faltantes
-        await this.buyIngredientsUc.buyIngredients(data);
-      }
+      // Comprar ingredientes faltantes
+      await this.buyIngredientsUc.buyIngredients(data);
+
       // descontar ingredientes del inventario
       for (const { ingredientId, quantity } of recipe.recipeIngredients) {
         await this.inventoryDriver.updateMenosInventory(ingredientId, quantity);

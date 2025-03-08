@@ -1,5 +1,6 @@
 import express from 'express';
 import http from 'http';
+import cors from 'cors';
 import { Server } from 'socket.io';
 import { AppDataSource } from './drivers/database/postgres.connect';
 import { config } from './common/config';
@@ -28,6 +29,8 @@ async function startServer() {
     app.use(express.json());
     // Interceptor
     app.use(requestHttpInterceptorHandler);
+
+    app.use(cors());
     // Error handling
     app.use(errorHandler);
 

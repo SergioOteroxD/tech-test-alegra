@@ -1,14 +1,27 @@
+import { Worker } from 'bullmq';
 import { RequestIngredientsUC } from '../../core/use_case/request-ingredients.uc';
-import { TaskUC } from '../../core/use_case/task-queue.uc';
 import { EwarehouseTask } from '../../common/enum/warehouse-queue.enum';
-
-const taskQueue = TaskUC.getInstance();
+import { databaseConfig } from '../../common/config';
 
 const requestIngredientsUc = RequestIngredientsUC.getInstance();
 
-taskQueue.process(EwarehouseTask.BUY_INGREDIENT, (job) => {
-  const taskData = job.data;
-  // Lógica para procesar la tarea
-  console.log('Processing task:', taskData);
-  requestIngredientsUc.requestIngredients(taskData);
-});
+new Worker(
+  EwarehouseTask.BUY_INGREDIENT,
+  async (job) => {
+    const taskData = job.data;
+    // Lógica para procesar la tarea
+    console.log('Processing task:', taskData);
+    await requestIngredientsUc.requestIngredients(taskData);
+  },
+  {
+    connection: {
+      host: databaseConfig.redis.host,
+      port: databaseConfig.redis.port,
+    },
+
+    limiter: {
+      max: 1, // 👈 Solo permite un trabajo activo a la vez
+      duration: 1000, // (Opcional) Espera 1 segundo antes de procesar el siguiente
+    },
+  },
+);
