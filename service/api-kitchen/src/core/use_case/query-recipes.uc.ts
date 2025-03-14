@@ -1,3 +1,4 @@
+import { Recipes } from '../../drivers/entities/recipes.entity';
 import { CustomError } from '../../common/types/custom-error';
 import { IresponseBase, ResponseBase, ResponseQuery } from '../../common/types/response-base.model';
 import { RecipeRepository } from '../../drivers/repositories/recipe.repository.impl';
@@ -65,7 +66,7 @@ export class QueryRecipesUC {
     }
   }
 
-  async getOne(orderId: number): Promise<IresponseBase> {
+  async getOne(orderId: number): Promise<IresponseBase<Recipes>> {
     // Buscar al usuario por el correo electrónico
     try {
       const data = await this.recipesDriver.getById(orderId);

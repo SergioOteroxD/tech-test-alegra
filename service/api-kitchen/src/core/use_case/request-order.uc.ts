@@ -58,7 +58,7 @@ export class RequestOrderUC {
         {
           code: 'REQ_ORDER_OK',
           message: 'La orden se ha solicitado correctamente.',
-          status: 200,
+          status: 201,
         },
         { orderId: order.id, recipe: { recipeId: recipe.id, name: recipe.name } },
       );
