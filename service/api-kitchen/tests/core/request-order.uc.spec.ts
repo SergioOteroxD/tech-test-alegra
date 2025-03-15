@@ -58,7 +58,7 @@ describe('RequestOrderUC', () => {
 
       expect(result).toBeInstanceOf(ResponseBase);
       expect(result.code).toBe('REQ_ORDER_OK');
-      expect(result.status).toBe(200);
+      expect(result.status).toBe(201);
       expect(mockTaskAdd).toHaveBeenCalledWith(EwarehouseTask.BUY_INGREDIENT, expect.any(Object));
       expect(mockWsBroadcast).toHaveBeenCalled();
     });
