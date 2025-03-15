@@ -101,7 +101,7 @@ export class RequestIngredientsUC {
         { recipe: { recipeId: recipe.id, name: recipe.name } },
       );
     } catch (error) {
-      console.log('🚀 ~ DiscountInventoryUC ~ requestOrder ~ error:', error);
+      console.log('🚀 ~ RequestIngredientsUC ~ requestOrder ~ error:', error);
       return new CustomError({ message: 'Error', code: 500 }, 'DiscountInventoryUC.requestOrder', 'Business');
     }
   }

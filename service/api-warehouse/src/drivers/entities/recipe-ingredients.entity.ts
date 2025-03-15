@@ -13,12 +13,9 @@ export class RecipeIngredients {
   @Column('integer', { name: 'quantity' })
   quantity: number;
 
-  @ManyToOne(
-    () => Ingredients,
-    (ingredients) => ingredients.recipeIngredients,
-  )
+  @ManyToOne(() => Ingredients, (ingredients) => ingredients.recipeIngredients)
   @JoinColumn([{ name: 'ingredient_id', referencedColumnName: 'id' }])
-  ingredient: Ingredients;
+  ingredient?: Ingredients;
 
   @ManyToOne(() => Recipes, (recipes) => recipes.recipeIngredients)
   @JoinColumn([{ name: 'recipe_id', referencedColumnName: 'id' }])

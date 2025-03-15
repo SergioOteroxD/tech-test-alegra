@@ -13,10 +13,13 @@ import purchasesRouter from './adapters/routes/purchases.routes';
 // configures dotenv to work in your application
 const app = express();
 const server = http.createServer(app); // Crear servidor HTTP para WebSockets
-export const webSocket = new Server(server, {
+const webSocket = new Server(server, {
   cors: { origin: '*' },
 });
+
+WebSocketDriver.getInstance(webSocket);
 import './adapters/event/web-socket.subcriber';
+import { WebSocketDriver } from './drivers/repositories/web-socket.driver.impl';
 
 const PORT = config.port;
 
