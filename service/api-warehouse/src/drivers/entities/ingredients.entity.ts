@@ -12,11 +12,11 @@ export class Ingredients {
   name: string;
 
   @OneToOne(() => Inventory, (inventory) => inventory.ingredient)
-  inventory: Inventory;
+  inventory?: Inventory;
 
   @OneToMany(() => Purchases, (purchases) => purchases.ingredient)
-  purchases: Purchases[];
+  purchases?: Purchases[];
 
   @OneToMany(() => RecipeIngredients, (recipeIngredients) => recipeIngredients.ingredient)
-  recipeIngredients: RecipeIngredients[];
+  recipeIngredients?: RecipeIngredients[];
 }

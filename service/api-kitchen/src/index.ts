@@ -8,14 +8,16 @@ import { requestHttpInterceptorHandler } from './adapters/lib/request-http.inter
 import { errorHandler } from './adapters/lib/excepcion-manager.filter';
 import orderRouter from './adapters/routes/order.routes';
 import recipesRouter from './adapters/routes/recipes.routes';
+import { WebSocketDriver } from './drivers/repositories/web-socket.driver.impl';
 import './adapters/event/task-queue.subscriber';
 
 // configures dotenv to work in your application
 const app = express();
 const server = http.createServer(app); // Crear servidor HTTP para WebSockets
-export const webSocket = new Server(server, {
+const webSocket = new Server(server, {
   cors: { origin: '*' },
 });
+WebSocketDriver.getInstance(webSocket);
 import './adapters/event/web-socket.subcriber';
 
 const PORT = config.port;

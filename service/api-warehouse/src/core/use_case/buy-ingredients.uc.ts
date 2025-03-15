@@ -21,7 +21,7 @@ export class BuyIngredientsUC {
     return BuyIngredientsUC.instance;
   }
 
-  async buyIngredients(data: ImissingIngredients[]): Promise<IresponseBase> {
+  async buyIngredients(data: ImissingIngredients[]): Promise<any> {
     // Buscar al usuario por el correo electrónico
     try {
       for (const ingredients of data) {

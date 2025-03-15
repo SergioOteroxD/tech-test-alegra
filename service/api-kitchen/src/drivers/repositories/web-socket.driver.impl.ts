@@ -1,28 +1,32 @@
-import { webSocket } from '../../index';
+import { Server } from 'socket.io';
 import { EwebSocketEvent } from '../../common/enum/web-socket.event';
 
 export class WebSocketDriver {
   private static instance: WebSocketDriver;
 
-  constructor() {}
+  private webSocket: Server;
+
+  constructor(webSocket?: Server) {
+    this.webSocket = webSocket;
+  }
 
   // Método para obtener la instancia única
-  public static getInstance(): WebSocketDriver {
+  public static getInstance(webSocket?: Server): WebSocketDriver {
     if (!WebSocketDriver.instance) {
-      WebSocketDriver.instance = new WebSocketDriver();
+      WebSocketDriver.instance = new WebSocketDriver(webSocket);
     }
     return WebSocketDriver.instance;
   }
 
   on(ev: string, callback: (...args: any[]) => void): void {
-    webSocket.on(ev, callback);
+    this.webSocket.on(ev, callback);
   }
 
   broadcast(event: EwebSocketEvent, data: any): void {
-    webSocket.emit(event, data);
+    this.webSocket.emit(event, data);
   }
 
   sendToClient(clientId: string, event: EwebSocketEvent, data: any): void {
-    webSocket.to(clientId).emit(event, data);
+    this.webSocket.to(clientId).emit(event, data);
   }
 }

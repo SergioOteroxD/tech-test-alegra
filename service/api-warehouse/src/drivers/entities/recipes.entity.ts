@@ -12,10 +12,10 @@ export class Recipes implements Irecipe {
   name: string;
 
   @OneToMany(() => Orders, (orders) => orders.recipe)
-  orders: Orders[];
+  orders?: Orders[];
 
   @OneToMany(() => RecipeIngredients, (recipeIngredients) => recipeIngredients.recipe)
-  recipeIngredients: RecipeIngredients[];
+  recipeIngredients?: RecipeIngredients[];
 
   @Column('timestamp without time zone', {
     name: 'created_at',
